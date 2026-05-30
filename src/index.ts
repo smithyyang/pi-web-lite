@@ -1,4 +1,5 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 import { loadConfig } from "./config.ts";
 import { fetchOne } from "./fetch.ts";
@@ -24,6 +25,11 @@ function formatSearchBatch(results: Array<(RoutedSearchResult & { attempts: Fail
 	}).join("\n\n---\n\n").trim();
 }
 
+function compactList(items: string[], max = 4): string {
+	if (items.length <= max) return items.join(", ");
+	return `${items.slice(0, max).join(", ")} +${items.length - max} more`;
+}
+
 export default function (pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "web_search",
@@ -35,6 +41,28 @@ export default function (pi: ExtensionAPI) {
 			queries: Type.Optional(Type.Array(Type.String(), { description: "Multiple search queries, executed independently." })),
 			numResults: Type.Optional(Type.Number({ description: "Results per query. Defaults to ~/.pi/web-search.json search.numResults, max 20." })),
 		}),
+		renderCall(args, theme) {
+			const queries = normalizeList((args as { query?: unknown }).query, (args as { queries?: unknown }).queries);
+			const label = queries.length <= 1 ? (queries[0] || "no query") : `${queries.length} queries`;
+			return new Text(theme.fg("toolTitle", theme.bold("web_search ")) + theme.fg("accent", label), 0, 0);
+		},
+		renderResult(result, { isPartial }, theme) {
+			const details = result.details as {
+				queryCount?: number;
+				successful?: number;
+				providerMode?: string;
+				results?: Array<{ keyId?: string; sources?: unknown[]; error?: string }>;
+			};
+			if (isPartial) return new Text(theme.fg("accent", "searching..."), 0, 0);
+			const totalSources = details?.results?.reduce((sum, item) => sum + (Array.isArray(item.sources) ? item.sources.length : 0), 0) ?? 0;
+			const keys = [...new Set((details?.results ?? []).map((item) => item.keyId).filter((value): value is string => typeof value === "string"))];
+			const errors = (details?.results ?? []).filter((item) => item.error).length;
+			let line = theme.fg("success", `${details?.successful ?? 0}/${details?.queryCount ?? 0} queries, ${totalSources} sources`);
+			line += theme.fg("muted", ` | ${details?.providerMode ?? "auto"}`);
+			if (keys.length > 0) line += theme.fg("muted", ` | ${compactList(keys)}`);
+			if (errors > 0) line += theme.fg("warning", ` | ${errors} errors`);
+			return new Text(line, 0, 0);
+		},
 		async execute(_toolCallId, params, signal, onUpdate) {
 			const queries = normalizeList(params.query, params.queries);
 			if (queries.length === 0) {
@@ -94,6 +122,27 @@ export default function (pi: ExtensionAPI) {
 			url: Type.Optional(Type.String({ description: "Single URL to fetch" })),
 			urls: Type.Optional(Type.Array(Type.String(), { description: "Multiple URLs to fetch" })),
 		}),
+		renderCall(args, theme) {
+			const urls = normalizeList((args as { url?: unknown }).url, (args as { urls?: unknown }).urls);
+			const label = urls.length <= 1 ? (urls[0] || "no URL") : `${urls.length} URLs`;
+			return new Text(theme.fg("toolTitle", theme.bold("fetch ")) + theme.fg("accent", label), 0, 0);
+		},
+		renderResult(result, { isPartial }, theme) {
+			const details = result.details as {
+				urlCount?: number;
+				successful?: number;
+				results?: Array<{ title?: string; truncated?: boolean; error?: string }>;
+			};
+			if (isPartial) return new Text(theme.fg("accent", "fetching..."), 0, 0);
+			const titles = (details?.results ?? []).map((item) => item.title).filter((value): value is string => typeof value === "string" && value.length > 0);
+			const truncated = (details?.results ?? []).filter((item) => item.truncated).length;
+			const errors = (details?.results ?? []).filter((item) => item.error).length;
+			let line = theme.fg("success", `${details?.successful ?? 0}/${details?.urlCount ?? 0} URLs`);
+			if (titles.length > 0) line += theme.fg("muted", ` | ${compactList(titles, 2)}`);
+			if (truncated > 0) line += theme.fg("warning", ` | ${truncated} truncated`);
+			if (errors > 0) line += theme.fg("error", ` | ${errors} errors`);
+			return new Text(line, 0, 0);
+		},
 		async execute(_toolCallId, params, signal, onUpdate) {
 			const urls = normalizeList(params.url, params.urls);
 			if (urls.length === 0) {
