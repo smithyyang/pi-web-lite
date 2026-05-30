@@ -35,7 +35,7 @@ export default function (pi: ExtensionAPI) {
 		name: "web_search",
 		label: "Web Search Lite",
 		description: "Search the web and return concise results with source links. Use multiple varied queries for broader research coverage.",
-		promptSnippet: "Search the web. Prefer queries with 2-4 distinct angles for research tasks."
+		promptSnippet: "Search the web. Prefer queries with 2-4 distinct angles for research tasks.",
 		parameters: Type.Object({
 			query: Type.Optional(Type.String({ description: "Single search query. Prefer queries for multi-angle research." })),
 			queries: Type.Optional(Type.Array(Type.String(), { description: "Multiple search queries, executed independently." })),
@@ -117,7 +117,7 @@ export default function (pi: ExtensionAPI) {
 		name: "fetch",
 		label: "Fetch",
 		description: "Fetch URL content directly and return readable text. Use this when the user asks to inspect a specific link.",
-		promptSnippet: "Fetch the content of a specific URL."
+		promptSnippet: "Fetch the content of a specific URL.",
 		parameters: Type.Object({
 			url: Type.Optional(Type.String({ description: "Single URL to fetch" })),
 			urls: Type.Optional(Type.Array(Type.String(), { description: "Multiple URLs to fetch" })),
