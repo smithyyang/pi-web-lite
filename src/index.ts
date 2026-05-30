@@ -34,8 +34,8 @@ export default function (pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "web_search",
 		label: "Web Search Lite",
-		description: "Lightweight web search using only Exa, Tavily, and Brave Search. Provider routing is controlled by ~/.pi/web-search.json: provider can be auto, balanced, exa, tavily, or brave. auto follows the configured providers priority order. balanced randomly samples flattened provider+apiKey targets with equal weight.",
-		promptSnippet: "Search the web with the lightweight Exa/Tavily/Brave pool. Use queries for 2-4 distinct angles in research tasks.",
+		description: "Search the web and return concise results with source links. Use multiple varied queries for broader research coverage.",
+		promptSnippet: "Search the web. Prefer queries with 2-4 distinct angles for research tasks."
 		parameters: Type.Object({
 			query: Type.Optional(Type.String({ description: "Single search query. Prefer queries for multi-angle research." })),
 			queries: Type.Optional(Type.Array(Type.String(), { description: "Multiple search queries, executed independently." })),
@@ -116,8 +116,8 @@ export default function (pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "fetch",
 		label: "Fetch",
-		description: "Fetch URL(s) and return their content. This is a plain fetch tool: no prompt, no video analysis, no AI summarization. GitHub URLs use the GitHub API for stable organization, repository, README, and file extraction. Output is truncated according to ~/.pi/web-search.json fetch.maxChars.",
-		promptSnippet: "Fetch URL content directly. For GitHub orgs/repos/files, this returns structured GitHub API content.",
+		description: "Fetch URL content directly and return readable text. Use this when the user asks to inspect a specific link.",
+		promptSnippet: "Fetch the content of a specific URL."
 		parameters: Type.Object({
 			url: Type.Optional(Type.String({ description: "Single URL to fetch" })),
 			urls: Type.Optional(Type.Array(Type.String(), { description: "Multiple URLs to fetch" })),
