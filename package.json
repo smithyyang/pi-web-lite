@@ -23,12 +23,6 @@
     "type": "git",
     "url": "git+https://github.com/smithyyang/pi-web-lite.git"
   },
-  "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "*",
-    "@earendil-works/pi-ai": "*",
-    "@earendil-works/pi-tui": "*",
-    "typebox": "*"
-  },
   "pi": {
     "extensions": [
       "./src/index.ts"

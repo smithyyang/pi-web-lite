@@ -5,7 +5,7 @@ Lightweight web access package for Pi. It registers only two tools:
 - `web_search` — search with Exa, Tavily, and Brave Search
 - `fetch` — fetch URL content directly
 
-No curator UI, no browser cookie access, no Gemini/Perplexity, no video analysis, no background servers, no storage cache.
+No curator UI, no browser cookie access, no Gemini/Perplexity, no video analysis, no background servers, no storage cache, and no package runtime dependencies.
 
 ## Configuration
 
