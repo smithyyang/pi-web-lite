@@ -112,9 +112,8 @@ async function fetchGitHubUser(owner: string, sourceUrl: string, options: FetchO
 		githubJson<GitHubRepo[]>(`https://api.github.com/users/${encodeURIComponent(owner)}/repos?sort=updated&per_page=100`, options),
 	]);
 	const title = user.name || user.login || owner;
-	let content = `# ${title}\n\n`;
+	let content = "";
 	if (user.bio) content += `${user.bio}\n\n`;
-	if (user.html_url) content += `${user.html_url}\n\n`;
 	content += `Public repositories: ${user.public_repos ?? repos.length}\n\n`;
 	content += "## Repositories\n\n";
 	content += repos.map(formatRepo).join("\n\n");
@@ -135,8 +134,7 @@ async function fetchGitHubRepo(owner: string, repoName: string, sourceUrl: strin
 		readme = "";
 	}
 	const title = repo.full_name || `${owner}/${repoName}`;
-	let content = `# ${title}\n\n${repo.description || "No description."}\n\n`;
-	if (repo.html_url) content += `${repo.html_url}\n\n`;
+	let content = `${repo.description || "No description."}\n\n`;
 	content += `Language: ${repo.language || "unknown"} | Stars: ${repo.stargazers_count ?? 0} | Forks: ${repo.forks_count ?? 0}\n`;
 	if (repo.updated_at) content += `Updated: ${repo.updated_at}\n`;
 	if (readme) content += `\n## README\n\n${readme}`;
@@ -175,7 +173,7 @@ async function fetchGeneric(url: string, options: FetchOptions): Promise<Omit<Fe
 	const { text, contentType } = await fetchText(url, options, { "User-Agent": "pi-web-lite" });
 	if (contentType.includes("text/html") || /^\s*</.test(text)) {
 		const converted = htmlToText(text);
-		return { url, title: converted.title, content: `# ${converted.title}\n\n${converted.text}`.trim() };
+		return { url, title: converted.title, content: converted.text.trim() };
 	}
 	return { url, title: url, content: text };
 }
